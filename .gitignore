@@ -1,0 +1,55 @@
+# Python virtual environments
+.venv/
+venv/
+venv*/
+__pycache__/
+*.py[cod]
+*.so
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+
+# IDE and OS files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Dataset: not required for inference
+images/
+labels/
+
+# Training runs and generated training artifacts
+runs/
+auto_retrain/
+*.cache
+
+# Temporary files and generated videos
+uploads/
+tmp/
+temp/
+*.log
+*.mp4
+*.avi
+*.mov
+*.mkv
+
+# Downloaded archives
+*.zip
+
+# Do not ignore the required application and model
+!app.py
+!run.py
+!run_linux.sh
+!run_windows.bat
+!requirements.txt
+!README.md
+!data.yaml
+!.env.example
+!.gitignore
+!best.pt
+!yolov8n.pt

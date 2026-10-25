@@ -1,0 +1,7 @@
+class_id,class_name,image_presence_count,bounding_box_count,percentage_of_images,percentage_of_boxes
+0,threew,2000,5162,20.00%,4.58%
+1,car,6500,64894,65.00%,57.55%
+2,h_vehicle,3000,9301,30.00%,8.25%
+3,person,3438,18633,34.38%,16.52%
+4,two,3500,13466,35.00%,11.94%
+5,unclassified,865,1314,8.65%,1.17%

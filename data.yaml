@@ -1,0 +1,12 @@
+path: .
+train: images/train
+val: images/val
+test: images/test
+
+names:
+  0: threew
+  1: car
+  2: h_vehicle
+  3: person
+  4: two
+  5: unclassified

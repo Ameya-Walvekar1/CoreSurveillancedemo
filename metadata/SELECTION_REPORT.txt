@@ -1,0 +1,53 @@
+========================================
+10K BALANCED DATASET SELECTION REPORT
+========================================
+
+Source Dataset: /media/ameya/4C0ADD5B0ADD431E/surveillance_ssl_v3/data/v4/final_standalone/
+Original Dataset Size: 193,227 images
+Selected Dataset Size: 10,000 images
+Random Seed: 42
+
+Selection Method: Stratified Group-Aware Multi-Label Presence Sampling (1 frame per sequence/group cap for visual diversity).
+
+Split Counts:
+  Train: 8,000
+  Val:   1,000
+  Test:  1,000
+  Total: 10,000
+
+Image-Level Class Presence (Total Selected 10,000):
+  threew       : 2,000 images (20.00%)
+  car          : 6,500 images (65.00%)
+  h_vehicle    : 3,000 images (30.00%)
+  person       : 3,438 images (34.38%)
+  two          : 3,500 images (35.00%)
+  unclassified : 865 images (8.65%)
+
+Bounding-Box Distribution:
+  threew       : 5,162 bboxes
+  car          : 64,894 bboxes
+  h_vehicle    : 9,301 bboxes
+  person       : 18,633 bboxes
+  two          : 13,466 bboxes
+  unclassified : 1,314 bboxes
+  Total Bboxes : 112,770
+
+Source Dataset Distribution:
+  dronevehicle  : 3,019 images
+  idd           : 3,931 images
+  indiascene365 : 166 images
+  iruvd         : 230 images
+  legacy_custom : 321 images
+  rsud20k       : 924 images
+  uavdt         : 5 images
+  uvh26         : 1,078 images
+  visdrone      : 326 images
+
+Group Leakage: 0
+Invalid Labels: 0
+Invalid Class IDs: 0
+Invalid Coordinates: 0
+Missing Images: 0
+Missing Labels: 0
+Symlinks: 0
+========================================

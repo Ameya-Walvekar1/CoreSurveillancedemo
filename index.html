@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Traffic Intelligence</title>
+<style>
+:root{--bg:#121316;--p:#1a1c20;--b:#2a2d33;--t:#e6e8eb;--m:#8b919b;--a:#4da3ff;--ok:#3ecf8e;--err:#ef6b6b}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t);font:13px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
+body{display:grid;grid-template-rows:44px minmax(0,1fr);gap:10px;padding:0 12px 12px}
+header{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--b);margin:0 -12px;padding:0 16px}
+h1{font-size:13px;font-weight:600;letter-spacing:.18em}
+.chips{display:flex;gap:8px}
+.chip{display:flex;align-items:center;gap:6px;border:1px solid var(--b);border-radius:99px;padding:3px 10px;color:var(--m);font-size:12px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--m)}
+.dot.ok{background:var(--ok)}.dot.err{background:var(--err)}
+main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 290px;gap:10px;min-height:0}
+.col{display:flex;flex-direction:column;gap:10px;min-height:0}
+.panel{background:var(--p);border:1px solid var(--b);border-radius:10px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.ph{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--b);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--m)}
+.ph span:last-child{text-transform:none;letter-spacing:0;max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pb{flex:1;min-height:0;position:relative;padding:10px;display:flex;flex-direction:column;gap:10px}
+.stage{flex:1;min-height:0;position:relative;border-radius:6px;background:#0c0d0f;overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--m)}
+video{width:100%;height:100%;object-fit:contain;display:none;background:#000}
+#drop{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;border:1.5px dashed var(--b);border-radius:6px;cursor:pointer;transition:.15s;text-align:center}
+#drop.over{border-color:var(--a);background:#4da3ff10}
+button{font:inherit;cursor:pointer;border-radius:6px;border:1px solid var(--b);background:#23262b;color:var(--t);padding:6px 14px}
+button:hover:not(:disabled){border-color:var(--a)}
+button.primary{background:var(--a);border-color:var(--a);color:#06121f;font-weight:600;padding:9px}
+button:disabled{opacity:.45;cursor:not-allowed}
+label{display:flex;justify-content:space-between;color:var(--m);margin-bottom:6px}
+label b{color:var(--t);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--a)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.c{background:#14161a;border:1px solid var(--b);border-radius:6px;padding:8px 10px}
+.c small{display:block;color:var(--m);font-size:11px;white-space:nowrap}
+.c b{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+.row{display:flex;justify-content:space-between;padding:4px 0;color:var(--m)}
+.row b{color:var(--t);font-weight:500}
+a.dl{text-align:center;text-decoration:none;border:1px solid var(--b);border-radius:6px;padding:7px;color:var(--t);pointer-events:none;opacity:.45}
+a.dl.on{pointer-events:auto;opacity:1;border-color:var(--a);color:var(--a)}
+@media(max-width:900px){main{grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr) auto}.col:last-child{grid-column:1/3;flex-direction:row}.col:last-child>.panel{flex:1}}
+</style>
+</head>
+<body>
+<header>
+  <h1>TRAFFIC INTELLIGENCE</h1>
+  <div class="chips">
+    <div class="chip"><i class="dot ok"></i>YOLOv8 · 6 classes</div>
+    <div class="chip"><i class="dot" id="appDot"></i><span id="appTxt">Connecting…</span></div>
+  </div>
+</header>
+
+<main>
+  <section class="panel">
+    <div class="ph"><span>Input video</span><span id="fname">No file selected</span></div>
+    <div class="pb">
+      <div class="stage">
+        <video id="inV" controls muted></video>
+        <div id="drop"><div>Drag &amp; drop a video here</div><button id="browse" type="button">Browse Video</button></div>
+      </div>
+      <input id="file" type="file" accept="video/*" hidden>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="ph"><span>Annotated output</span><span id="outState">—</span></div>
+    <div class="pb"><div class="stage"><video id="outV" controls></video><span id="outPh">—</span></div></div>
+  </section>
+
+  <div class="col">
+    <section class="panel">
+      <div class="ph"><span>Settings</span></div>
+      <div class="pb">
+        <div><label>Confidence threshold <b id="confV">0.25</b></label>
+        <input id="conf" type="range" min="0.05" max="0.95" step="0.05" value="0.25"></div>
+        <button class="primary" id="run" disabled>Run Detection</button>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="ph"><span>Detections</span><span>peak per frame</span></div>
+      <div class="pb"><div class="grid">
+        <div class="c"><small>Cars</small><b data-k="car">—</b></div>
+        <div class="c"><small>Two-wheelers</small><b data-k="two">—</b></div>
+        <div class="c"><small>Three-wheelers</small><b data-k="threew">—</b></div>
+        <div class="c"><small>Heavy vehicles</small><b data-k="h_vehicle">—</b></div>
+        <div class="c"><small>People</small><b data-k="person">—</b></div>
+        <div class="c"><small>Unclassified</small><b data-k="unclassified">—</b></div>
+      </div></div>
+    </section>
+    <section class="panel">
+      <div class="ph"><span>Results</span></div>
+      <div class="pb">
+        <div><div class="row">Status<b id="status">Idle</b></div>
+        <div class="row">Processing time<b id="dur">—</b></div></div>
+        <a class="dl" id="dl" download="annotated_output.mp4">Download annotated video</a>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script type="module">
+import { Client, handle_file } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
+
+/* ===== INTEGRATION POINT — match these to your Gradio app ===== */
+const SERVER   = location.origin + "/gradio"; // where gr.mount_gradio_app() serves Gradio
+const API_NAME = "/detect";                   // api_name of your Run-button click event
+/* Call: predict(API_NAME, [video, confidence]) → [annotated_video, optional counts dict] */
+
+const $ = id => document.getElementById(id);
+let client, file;
+
+const setApp = (ok, t) => { $("appDot").className = "dot " + (ok ? "ok" : "err"); $("appTxt").textContent = t; };
+const setFile = f => {
+  if (!f || !f.type.startsWith("video/")) return;
+  file = f; $("fname").textContent = f.name;
+  $("inV").src = URL.createObjectURL(f); $("inV").style.display = "block"; $("drop").style.display = "none";
+  $("run").disabled = !client;
+};
+
+try { client = await Client.connect(SERVER, { events: ["data", "status"] }); setApp(true, "Connected"); $("run").disabled = !file; }
+catch { setApp(false, "Backend unreachable"); $("status").textContent = "Backend unreachable"; }
+
+$("browse").onclick = e => { e.stopPropagation(); $("file").click(); };
+$("drop").onclick = () => $("file").click();
+$("file").onchange = e => setFile(e.target.files[0]);
+$("conf").oninput = e => $("confV").textContent = (+e.target.value).toFixed(2);
+const d = $("drop");
+d.ondragover = e => { e.preventDefault(); d.classList.add("over"); };
+d.ondragleave = () => d.classList.remove("over");
+d.ondrop = e => { e.preventDefault(); d.classList.remove("over"); setFile(e.dataTransfer.files[0]); };
+
+$("run").onclick = async () => {
+  $("run").disabled = true; $("status").textContent = "Processing…"; $("dur").textContent = "—";
+  $("dl").classList.remove("on"); $("outV").style.display = "none"; $("outPh").style.display = ""; $("outState").textContent = "—";
+  document.querySelectorAll("[data-k]").forEach(n => n.textContent = "—");
+  const t0 = performance.now();
+  try {
+    $("status").textContent = "Uploading…";
+    let data;
+    for await (const m of client.submit(API_NAME, [handle_file(file), +$("conf").value])) {
+      if (m.type === "data") { data = m.data; break; }
+      if (m.type !== "status") continue;
+      if (m.stage === "error") throw new Error(m.message || "Backend error");
+      const p = m.progress_data?.[0];
+      if (p) $("status").textContent = p.length ? `${p.desc || "Processing"} ${p.index}/${p.length}` : (p.desc || "Processing…");
+      else if (m.stage === "pending") $("status").textContent = m.position ? `Queued (#${m.position + 1})` : "Processing…";
+    }
+    if (!data) throw new Error("No result returned");
+    const [vid, counts] = data;
+    const url = vid?.video?.url || vid?.url || vid;
+    $("outV").src = url; $("outV").style.display = "block"; $("outPh").style.display = "none";
+    $("dl").href = url; $("dl").classList.add("on");
+    $("outState").textContent = "Ready";
+    if (counts && typeof counts === "object")
+      document.querySelectorAll("[data-k]").forEach(n => { if (counts[n.dataset.k] != null) n.textContent = counts[n.dataset.k]; });
+    $("status").textContent = "Complete";
+    $("dur").textContent = ((performance.now() - t0) / 1000).toFixed(1) + " s";
+  } catch (e) {
+    $("status").textContent = "Failed"; $("outState").textContent = e?.message || "Error"; $("outState").title = e?.message || "";
+    console.error(e);
+  }
+  $("run").disabled = false;
+};
+</script>
+</body>
+</html>
