@@ -172,9 +172,4 @@ launcher does not install GPU drivers or guarantee GPU acceleration.
 - **Gradio does not start:** Check the terminal output for errors or
   a port conflict.
 
-## Redistribution
 
-Check the applicable redistribution terms for the trained model,
-base weights, source datasets, and third-party dependencies before
-redistributing them. No independent test-performance or accuracy
-claim is made in this README.
